@@ -7,9 +7,9 @@
 
 	<dependencies>
 		<dependency>
-			<groupId>lerrain.tool</groupId>
+			<groupId>lerrain</groupId>
 			<artifactId>document</artifactId>
-			<version>4.0.2</version>
+			<version>4.3</version>
 		</dependency>
 		<dependency>
 			<groupId>com.itext</groupId>
@@ -40,8 +40,8 @@
 				<artifactId>maven-compiler-plugin</artifactId>
 				<configuration>
 					<encoding>UTF-8</encoding>
-					<source>1.7</source>
-					<target>1.7</target>
+					<source>1.8</source>
+					<target>1.8</target>
 				</configuration>
 			</plugin>
 		</plugins>

@@ -6,36 +6,36 @@ import lerrain.tool.script.warlock.CodeImpl;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
-import java.io.PrintWriter;
 import java.util.Map;
 
 public class ScriptRuntimeException extends RuntimeException
 {
 	Code code;
-	Factors stack;
 
-	public ScriptRuntimeException(Code code, Factors stack, String detail, Exception e)
+	Factors factors;
+
+	public ScriptRuntimeException(Code code, Factors factors, String detail, Exception e)
 	{
 		super(detail, e);
 
 		this.code = code;
-		this.stack = stack;
+		this.factors = factors;
 	}
 
-	public ScriptRuntimeException(Code code, Factors stack, String detail)
+	public ScriptRuntimeException(Code code, Factors factors, String detail)
 	{
 		super(detail);
 
 		this.code = code;
-		this.stack = stack;
+		this.factors = factors;
 	}
 
-	public ScriptRuntimeException(Code code, Factors stack, Exception e)
+	public ScriptRuntimeException(Code code, Factors factors, Exception e)
 	{
 		super(e);
 
 		this.code = code;
-		this.stack = stack;
+		this.factors = factors;
 	}
 
 	public Code getCode()
@@ -45,21 +45,40 @@ public class ScriptRuntimeException extends RuntimeException
 
 	public Map getStackMap()
 	{
-		if (stack instanceof Stack)
-			return ((Stack)stack).getStackMap();
+		if (factors instanceof Stack)
+			return ((Stack) factors).getStackMap();
 
 		return null;
 	}
 
-	public String getMessage()
+	public Factors getFactors()
+	{
+		return factors;
+	}
+
+	public String toStackString()
 	{
 		if (!Script.STACK_MESSAGE)
-			return super.getMessage();
+			return super.toString();
 
 		try (ByteArrayOutputStream os = new ByteArrayOutputStream(); PrintStream ps = new PrintStream(os))
 		{
-			ps.println(super.getMessage());
-			((CodeImpl) code).printAll(ps, super.getMessage());
+			String funcName = ((CodeImpl) code).getScriptName();
+			ps.println("---- Cause in <" + (funcName == null ? "?" : funcName) + "> ----");
+
+			String msg;
+			if (this.getCause() instanceof ScriptRuntimeException)
+				msg = "...";
+			else if (this.getCause() != null)
+				msg = "... ==> " + super.getMessage();
+			else
+				msg = super.getMessage();
+
+			((CodeImpl) code).printAll(ps, msg);
+
+			if (this.getCause() instanceof ScriptRuntimeException)
+				ps.println(((ScriptRuntimeException)this.getCause()).toStackString());
+
 			return os.toString();
 		}
 		catch (Exception e)
@@ -67,24 +86,4 @@ public class ScriptRuntimeException extends RuntimeException
 			return e.getMessage();
 		}
 	}
-
-//	public void printStackTrace(PrintStream ps)
-//	{
-//		if (code instanceof CodeImpl)
-//			((CodeImpl)code).printAll(ps, this);
-//		else
-//			ps.println(code.toText(""));
-//
-//		super.printStackTrace(ps);
-//	}
-//
-//	public void printStackTrace(PrintWriter ps)
-//	{
-//		if (code instanceof CodeImpl)
-//			((CodeImpl)code).printAll(ps, this);
-//		else
-//			ps.println(code.toText(""));
-//
-//		super.printStackTrace(ps);
-//	}
 }
